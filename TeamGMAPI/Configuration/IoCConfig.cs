@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using TeamGM.CROSSCUTTING.UnitOfWork;
 using TeamGM.DATA.UnitOfWork;
+using TeamGM.DOMAIN.Interfaces.Helpers;
+using TeamGM.DOMAIN.Notifications;
 
 namespace TeamGMAPI.Configuration
 {
@@ -13,6 +15,7 @@ namespace TeamGMAPI.Configuration
         public static IServiceCollection AddTeamGmService(this IServiceCollection services)
         {
             services.AddRepositoryService();
+            services.AddHelpersService();
 
             return services;
         }
@@ -22,6 +25,13 @@ namespace TeamGMAPI.Configuration
         {
             service.AddScoped<IDapperUnitOfWork, DapperUnitOfWork>();
             service.AddScoped<DbSession>();
+
+            return service;
+        }
+
+        private static IServiceCollection AddHelpersService(this IServiceCollection service)
+        {
+            service.AddScoped<INotificador, Notificador>();
 
             return service;
         }

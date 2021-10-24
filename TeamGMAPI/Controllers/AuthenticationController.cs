@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using TeamGM.DOMAIN.Interfaces.Helpers;
 using TeamGM.DOMAIN.ViewModels;
 using TeamGMAPI.Extensions;
+using System.Security.Claims;
+using DevIO.Api.Extensions;
 
 namespace TeamGMAPI.Controllers
 {
@@ -31,9 +33,9 @@ namespace TeamGMAPI.Controllers
             
         }
 
-
+        [ClaimsAuthorize("WebMaster", "AddUser")]
         [HttpPost]
-        [Route("api/register")]
+        [Route("register")]
         public async Task<ActionResult> Registrar(RegisterUserViewModel registerUser)
         {
             if (!ModelState.IsValid)
@@ -47,19 +49,21 @@ namespace TeamGMAPI.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, registerUser.Password);
+            
 
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, false);
-                return CustomResponse(GeraJwt());
+                return CustomResponse(await GeraJwt(user.Email));
             }
             else
                 return CustomResponse(result);
             
         }
 
+        
         [HttpPost]
-        [Route("api/login")]
+        [Route("login")]
         public async Task<ActionResult> Login(LoginUserViewModel loginUser)
         {
             if (!ModelState.IsValid)
@@ -69,7 +73,7 @@ namespace TeamGMAPI.Controllers
 
             if (result.Succeeded)
             {
-                return CustomResponse(GeraJwt());
+                return CustomResponse(await GeraJwt(loginUser.Email));
             }
             else if (result.IsLockedOut)
             {
@@ -79,17 +83,36 @@ namespace TeamGMAPI.Controllers
                 return CustomResponse(loginUser); ;
         }
 
-        private string GeraJwt()
+        private async Task<string> GeraJwt(string email)
         {
+            var user = await _userManager.FindByEmailAsync(email);
+            var claims = await _userManager.GetClaimsAsync(user);
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Nbf, ToUnixEpochDate(DateTime.UtcNow).ToString()));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(DateTime.UtcNow).ToString(), ClaimValueTypes.Integer64));
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+
+            foreach (var userRole in userRoles)
+            {
+                claims.Add(new Claim("role", userRole));
+            }
+
+            var identityClaims = new ClaimsIdentity();
+            identityClaims.AddClaims(claims);
 
             var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = _appSettings.Emissor,
                 Audience = _appSettings.ValidoEm,
                 Expires = DateTime.UtcNow.AddHours(_appSettings.ExpiracaoHoras),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Subject = identityClaims
 
             });
 
@@ -97,6 +120,9 @@ namespace TeamGMAPI.Controllers
 
             return encodedToken;
         }
+
+        private static long ToUnixEpochDate(DateTime date)
+            => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
 
 
     }

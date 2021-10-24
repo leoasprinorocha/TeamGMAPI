@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TeamGM.CROSSCUTTING\TeamGM.CROSSCUTTING.csproj" />
+    <ProjectReference Include="..\TeamGM.CROSSCUTTING\Base.CROSSCUTTING.csproj" />
   </ItemGroup>
 
 </Project>

@@ -10,7 +10,7 @@ using TeamGM.DOMAIN.Notifications;
 namespace TeamGMAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public abstract class MainController : ControllerBase
     {
         private readonly INotificador _notificador;

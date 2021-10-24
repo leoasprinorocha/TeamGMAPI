@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Base.BUSINESS.Interfaces;
+using BaseAPI.Extensions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +35,9 @@ namespace TeamGMAPI.Configuration
         private static IServiceCollection AddHelpersService(this IServiceCollection service)
         {
             service.AddScoped<INotificador, Notificador>();
+
+            service.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            service.AddScoped<IUser, AspNetUser>();
 
             return service;
         }

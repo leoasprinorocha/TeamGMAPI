@@ -14,23 +14,25 @@ using TeamGM.DOMAIN.ViewModels;
 using TeamGMAPI.Extensions;
 using System.Security.Claims;
 using DevIO.Api.Extensions;
+using Base.DOMAIN.ViewModels.User;
+using Base.BUSINESS.Interfaces;
 
 namespace TeamGMAPI.Controllers
 {
-    
+
     public class AuthenticationController : MainController
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly AppSettings _appSettings;
-        
 
-        public AuthenticationController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, INotificador notificador, IOptions<AppSettings> appSettings) : base(notificador)
+
+        public AuthenticationController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, INotificador notificador, IOptions<AppSettings> appSettings, IUser appUser) : base(notificador, appUser)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appSettings = appSettings.Value;
-            
+
         }
 
         [ClaimsAuthorize("WebMaster", "AddUser")]
@@ -38,6 +40,7 @@ namespace TeamGMAPI.Controllers
         [Route("register")]
         public async Task<ActionResult> Registrar(RegisterUserViewModel registerUser)
         {
+
             if (!ModelState.IsValid)
                 return CustomResponse(registerUser);
 
@@ -49,7 +52,7 @@ namespace TeamGMAPI.Controllers
             };
 
             var result = await _userManager.CreateAsync(user, registerUser.Password);
-            
+
 
             if (result.Succeeded)
             {
@@ -58,10 +61,10 @@ namespace TeamGMAPI.Controllers
             }
             else
                 return CustomResponse(result);
-            
+
         }
 
-        
+
         [HttpPost]
         [Route("login")]
         public async Task<ActionResult> Login(LoginUserViewModel loginUser)
@@ -83,7 +86,8 @@ namespace TeamGMAPI.Controllers
                 return CustomResponse(loginUser); ;
         }
 
-        private async Task<string> GeraJwt(string email)
+
+        private async Task<LoginResponseViewModel> GeraJwt(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
             var claims = await _userManager.GetClaimsAsync(user);
@@ -118,7 +122,24 @@ namespace TeamGMAPI.Controllers
 
             var encodedToken = tokenHandler.WriteToken(token);
 
-            return encodedToken;
+            var response = new LoginResponseViewModel
+            {
+                AccessToken = encodedToken,
+                ExpiresIn = TimeSpan.FromHours(_appSettings.ExpiracaoHoras).TotalSeconds,
+                UserToken = new UserTokenViewModel
+                {
+                    Id = user.Id,
+                    Email = user.Email,
+                    Claims = claims.Select(c => new ClaimViewModel
+                    {
+                        Type = c.Type,
+                        Value = c.Value
+
+                    })
+                }
+            };
+
+            return response;
         }
 
         private static long ToUnixEpochDate(DateTime date)

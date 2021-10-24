@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DATA\Base.DATA.csproj" />
     <ProjectReference Include="..\DOMAIN\Base.DOMAIN.csproj" />
+    <ProjectReference Include="..\TeamGM.BUSINESS\Base.BUSINESS.csproj" />
     <ProjectReference Include="..\TeamGM.CROSSCUTTING\Base.CROSSCUTTING.csproj" />
   </ItemGroup>
 

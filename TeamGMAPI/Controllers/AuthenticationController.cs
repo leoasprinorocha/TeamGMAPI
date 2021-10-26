@@ -76,7 +76,7 @@ namespace TeamGMAPI.Controllers
 
             if (result.Succeeded)
             {
-                return CustomResponse(await GeraJwt(loginUser.Email));
+                return Ok(await GeraJwt(loginUser.Email));
             }
             else if (result.IsLockedOut)
             {

@@ -35,7 +35,7 @@ namespace TeamGMAPI.Controllers
 
         }
 
-        [ClaimsAuthorize("WebMaster", "AddUser")]
+        
         [HttpPost]
         [Route("register")]
         public async Task<ActionResult> Registrar(RegisterUserViewModel registerUser)

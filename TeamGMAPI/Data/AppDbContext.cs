@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace TeamGMAPI.Data
+namespace BaseAPI.Data
 {
     public class AppDbContext : IdentityDbContext
     {

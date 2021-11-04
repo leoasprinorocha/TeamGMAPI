@@ -14,7 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TeamGM.DATA.Context;
 using TeamGMAPI.Configuration;
-using TeamGMAPI.Data;
+using BaseAPI.Data;
 
 namespace TeamGMAPI
 {

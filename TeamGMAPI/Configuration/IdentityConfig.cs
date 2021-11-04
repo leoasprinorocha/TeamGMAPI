@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TeamGM.DOMAIN.ViewModels;
-using TeamGMAPI.Data;
+using BaseAPI.Data;
 using TeamGMAPI.Extensions;
 
 namespace TeamGMAPI.Configuration

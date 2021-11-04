@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace TeamGMAPI.Migrations
+namespace BaseAPI.Migrations
 {
-    public partial class MyFirstMigration : Migration
+    public partial class Firt : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
